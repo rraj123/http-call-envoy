@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  envoy:
+    image: envoyproxy/envoy:v1.30-latest
+    hostname: envoy
+    ports:
+      - "10000:10000"
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+      - ./target/wasm32-wasi/release:/etc/envoy/proxy-wasm-plugins
+    networks:
+      - envoymesh
+    # Additional options:
+    # For debugging add this: --component-log-level wasm:debug
+    # If you want to test with 1 thread, add this: --concurrency 1
+    command: envoy -c /etc/envoy/envoy.yaml --concurrency 1 --component-log-level wasm:debug
+
+  httpbin:
+    image: kennethreitz/httpbin
+    hostname: httpbin
+    ports:
+      - "80:80"
+    networks:
+      - envoymesh
+
+  grpc-server-service:
+    image: localhost:5001/grpcserver:latest
+    container_name: grpc-server-envoy
+    ports:
+      - "50051:50051"
+    networks:
+      - envoymesh
+    healthcheck:
+      test: [ "CMD", "lsof", "-i", ":50051" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  # grpc-client:
+  #   image: localhost:5001/grpcclient:latest
+  #   container_name: grpc-client-envoy
+  #   depends_on:
+  #     grpc-server-service:
+  #       condition: service_healthy
+  #   networks:
+  #     - envoymesh
+  authservice:
+    image: localhost:5001/authservice:latest
+    container_name: auth-service
+    ports:
+      - "4000:4000"
+    networks:
+      - envoymesh
+networks:
+  envoymesh: {}
