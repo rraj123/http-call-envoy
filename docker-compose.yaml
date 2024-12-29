@@ -24,18 +24,18 @@ services:
     networks:
       - envoymesh
 
-  grpc-server-service:
-    image: localhost:5001/grpcserver:latest
-    container_name: grpc-server-envoy
-    ports:
-      - "50051:50051"
-    networks:
-      - envoymesh
-    healthcheck:
-      test: [ "CMD", "lsof", "-i", ":50051" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # grpc-server-service:
+  #   image: localhost:5001/grpcserver:latest
+  #   container_name: grpc-server-envoy
+  #   ports:
+  #     - "50051:50051"
+  #   networks:
+  #     - envoymesh
+  #   healthcheck:
+  #     test: [ "CMD", "lsof", "-i", ":50051" ]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
   # grpc-client:
   #   image: localhost:5001/grpcclient:latest
   #   container_name: grpc-client-envoy
